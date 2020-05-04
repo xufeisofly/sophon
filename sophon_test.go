@@ -2,8 +2,9 @@ package sophon_test
 
 import (
 	"fmt"
-	"sophon"
 	"testing"
+
+	"github.com/xufeisofly/sophon"
 )
 
 func TestDir(t *testing.T) {
