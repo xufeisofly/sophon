@@ -1,4 +1,4 @@
-module sophon
+module github.com/xufeisofly/sophon
 
 go 1.13
 
