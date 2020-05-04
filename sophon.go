@@ -14,7 +14,7 @@ func New() *Sophon {
 	return &Sophon{}
 }
 
-type BlockFunc func() error
+type BlockFunc func() bool
 
 // Block 注册监测任务
 func (s *Sophon) Block(desc string, f BlockFunc) {
@@ -35,8 +35,8 @@ func (s *Sophon) File(path string) *File {
 }
 
 type result struct {
-	desc string
-	err  error
+	desc    string
+	canPass bool
 }
 
 func (s *Sophon) Run() {
@@ -45,18 +45,18 @@ func (s *Sophon) Run() {
 
 	for _, task := range s.Tasks {
 		go func(t *Task) {
-			err := t.Fn()
+			canPass := t.Fn()
 			rets <- result{
-				desc: t.Desc,
-				err:  err,
+				desc:    t.Desc,
+				canPass: canPass,
 			}
 		}(task)
 	}
 
 	for range s.Tasks {
 		ret := <-rets
-		if ret.err != nil {
-			errText = errText + fmt.Sprintf("%s error: %s", ret.desc, ret.err.Error()) + "\n"
+		if !ret.canPass {
+			errText = errText + fmt.Sprintf("Sophon blocked!: %s", ret.desc) + "\n"
 		}
 	}
 

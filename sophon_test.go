@@ -1,7 +1,6 @@
 package sophon_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/xufeisofly/sophon"
@@ -41,12 +40,12 @@ func TestRun(t *testing.T) {
 	assertPanic(t, func() {
 		s := sophon.New()
 
-		s.Block("test1", func() error {
-			return fmt.Errorf("test1 error!!")
+		s.Block("test1", func() bool {
+			return false
 		})
 
-		s.Block("test2", func() error {
-			return fmt.Errorf("test2 error!!")
+		s.Block("test2", func() bool {
+			return false
 		})
 
 		if len(s.Tasks) != 2 {
