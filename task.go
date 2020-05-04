@@ -2,9 +2,9 @@ package sophon
 
 type Task struct {
 	Desc string
-	Fn   func()
+	Fn   BlockFunc
 }
 
-func NewTask(desc string, fn func()) *Task {
+func NewTask(desc string, fn BlockFunc) *Task {
 	return &Task{desc, fn}
 }

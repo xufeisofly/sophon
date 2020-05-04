@@ -13,8 +13,10 @@ func New() *Sophon {
 	return &Sophon{}
 }
 
+type BlockFunc func() error
+
 // Block 注册监测任务
-func (s *Sophon) Block(desc string, f func()) {
+func (s *Sophon) Block(desc string, f BlockFunc) {
 	task := NewTask(desc, f)
 	s.register(task)
 }
@@ -32,8 +34,25 @@ func (s *Sophon) File(path string) *File {
 }
 
 func (s *Sophon) Run() {
+	var errchan = make(chan error, len(s.Tasks))
+	var errText string
+
 	for _, task := range s.Tasks {
-		task.Fn()
+		go func(t *Task) {
+			err := t.Fn()
+			errchan <- err
+		}(task)
+	}
+
+	for range s.Tasks {
+		err := <-errchan
+		if err != nil {
+			errText = errText + "\n" + err.Error()
+		}
+	}
+
+	if errText != "" {
+		panic(errText)
 	}
 }
 

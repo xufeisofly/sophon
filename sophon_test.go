@@ -6,17 +6,6 @@ import (
 	"testing"
 )
 
-func TestBlock(t *testing.T) {
-	s := sophon.New()
-	s.Block("test1", func() {
-		fmt.Println("show test1")
-	})
-
-	if len(s.Tasks) != 1 {
-		t.Errorf("[TestBlock] tasks number expected: %d, actual: %d", 1, len(s.Tasks))
-	}
-}
-
 func TestDir(t *testing.T) {
 	s := sophon.New()
 	dir := s.Dir("./demo")
@@ -45,5 +34,33 @@ func TestFile(t *testing.T) {
 	if file.Ext() != ".go" {
 		t.Errorf("file ext expected: %s, actual: %s", ".go", file.Ext())
 	}
-	fmt.Println(file.Content())
+}
+
+func TestRun(t *testing.T) {
+	assertPanic(t, func() {
+		s := sophon.New()
+
+		s.Block("test1", func() error {
+			return fmt.Errorf("test1 error!!")
+		})
+
+		s.Block("test2", func() error {
+			return fmt.Errorf("test2 error!!")
+		})
+
+		if len(s.Tasks) != 2 {
+			t.Errorf("[TestBlock] tasks number expected: %d, actual: %d", 1, len(s.Tasks))
+		}
+
+		s.Run()
+	})
+}
+
+func assertPanic(t *testing.T, f func()) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	f()
 }
