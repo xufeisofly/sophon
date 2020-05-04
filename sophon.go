@@ -1,6 +1,7 @@
 package sophon
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -33,21 +34,29 @@ func (s *Sophon) File(path string) *File {
 	return NewFile(path, nil)
 }
 
+type result struct {
+	desc string
+	err  error
+}
+
 func (s *Sophon) Run() {
-	var errchan = make(chan error, len(s.Tasks))
+	var rets = make(chan result, len(s.Tasks))
 	var errText string
 
 	for _, task := range s.Tasks {
 		go func(t *Task) {
 			err := t.Fn()
-			errchan <- err
+			rets <- result{
+				desc: t.Desc,
+				err:  err,
+			}
 		}(task)
 	}
 
 	for range s.Tasks {
-		err := <-errchan
-		if err != nil {
-			errText = errText + "\n" + err.Error()
+		ret := <-rets
+		if ret.err != nil {
+			errText = errText + fmt.Sprintf("%s error: %s", ret.desc, ret.err.Error()) + "\n"
 		}
 	}
 
